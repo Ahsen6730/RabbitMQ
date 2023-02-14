@@ -55,7 +55,11 @@ namespace Producer.WinForm
 
             isConnectionOpen = connection.IsOpen;
         }
-
+        class Mesaj
+        {
+            public string id { get; set; }
+            public string epc { get; set; }
+        }
         private void btnPublish_Click(object sender, EventArgs e)
         {
             var message = txtMessage.Text;
@@ -64,8 +68,10 @@ namespace Producer.WinForm
             {
                 if (chUseCounter.Checked)
                     message = $"[{i + 1}] - {txtMessage.Text}";
-
-                WriteDataToExchange(txtExchangeName.Text, txtRoutingKey.Text, message);
+                Mesaj msg = new Mesaj();
+                msg.epc = message.Trim();
+                msg.id = "0";
+                WriteDataToExchange(txtExchangeName.Text, txtRoutingKey.Text, msg);
             }
         }
 
@@ -155,5 +161,10 @@ namespace Producer.WinForm
         }
 
         #endregion
+
+        private void txtMessage_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

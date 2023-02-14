@@ -1,7 +1,10 @@
-﻿using RabbitMQ.Client;
+﻿using Newtonsoft.Json;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
+using System.IO;
 using System.Text;
+using System.Text.Json;
 
 namespace Consumer.ConsoleApp
 {
@@ -12,15 +15,19 @@ namespace Consumer.ConsoleApp
         private static IConnection connection;
         private static IModel _channel;
         private static IModel channel => _channel ??= CreateOrGetChannel();
-
+        class Mesaj
+        {
+            public string id { get; set; }
+            public string epc { get; set; }
+        }
         static void Main(string[] args)
         {
-            queueName = args.Length > 0 ? args[0] : "test_queue";
+            queueName = args.Length > 0 ? args[0] : "test2";
 
             connection = GetConnection();
 
             channel.QueueDeclare(queueName, exclusive: false);
-            channel.QueueBind(queueName, "exchange_dir", queueName);
+            channel.QueueBind(queueName, "test2", queueName);
 
             var consumerEvent = new EventingBasicConsumer(channel);
 
@@ -28,8 +35,10 @@ namespace Consumer.ConsoleApp
             {
                 var byteArr = e.Body.ToArray();
                 var bodyStr = Encoding.UTF8.GetString(byteArr);
+                var jsonString = JsonConvert.DeserializeObject<Mesaj>(bodyStr);
+                Console.WriteLine($"Received Data json: {bodyStr}");
 
-                Console.WriteLine($"Received Data: {bodyStr}");
+                Console.WriteLine($"Received Data: {jsonString.epc}");
 
                 channel.BasicAck(e.DeliveryTag, false);
             };
